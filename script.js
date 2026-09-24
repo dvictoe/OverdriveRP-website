@@ -57,10 +57,12 @@ const statusMessage = document.querySelector('[data-server-message]');
 const statusUpdated = document.querySelector('[data-server-updated]');
 const statusIcon = document.querySelector('[data-status-icon]');
 const statusRefresh = document.querySelector('[data-status-refresh]');
+const statusPlayers = document.querySelector('[data-server-players]');
 
-const setServerStatus = (state, message) => {
+const setServerStatus = (state, message, players = '--') => {
   statusText.textContent = state;
   statusMessage.textContent = message;
+  statusPlayers.textContent = players;
   statusIcon.className = `status-icon status-icon-${state === 'Online' ? 'online' : 'pending'}`;
   statusUpdated.textContent = `Sidst opdateret: ${new Date().toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' })}`;
 };
@@ -76,7 +78,8 @@ const loadServerStatus = async () => {
     const response = await fetch(serverConfig.endpoint);
     if (!response.ok) throw new Error('Status request failed');
     const server = await response.json();
-    setServerStatus('Online', `${server.Data?.clients ?? 0}/${server.Data?.svMaxclients ?? 0} spillere er online lige nu.`);
+    const players = server.Data?.clients ?? 0;
+    setServerStatus('Online', `${players}/${server.Data?.svMaxclients ?? 0} spillere er online lige nu.`, players);
   } catch {
     setServerStatus('Offline', 'Serveren svarer ikke lige nu. Prøv igen senere eller følg med på Discord.');
   }
